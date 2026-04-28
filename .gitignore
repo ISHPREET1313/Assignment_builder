@@ -1,0 +1,21 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.venv/
+env/
+venv/
+
+# Generated outputs (don't commit reports)
+output/
+logs/
+*.docx
+!sample/**/*.docx
+
+# Temporary image folder
+img_tmp/
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,31 @@
+# ──────────────────────────────────────────────────────
+#  AutoDocSystem — questions.txt
+#  One block per experiment, separated by a blank line.
+#
+#  Fields:
+#    EXP:      experiment number  (must match filename: exp1.py, exp2.c …)
+#    QUESTION: the aim / objective text
+#    INPUT:    stdin fed to the program (omit or leave blank if not needed)
+#
+#  Tip: you can also keep inputs in a separate inputs.txt file — see README.
+# ──────────────────────────────────────────────────────
+
+EXP: 1
+QUESTION: Write a Python program to add two numbers entered by the user.
+INPUT: 3 5
+
+EXP: 2
+QUESTION: Write a Python program to check whether a given number is even or odd.
+INPUT: 7
+
+EXP: 3
+QUESTION: Write a Python program to print the Fibonacci series up to N terms.
+INPUT: 8
+
+EXP: 4
+QUESTION: Write a Python program to find the factorial of a number using recursion.
+INPUT: 6
+
+EXP: 5
+QUESTION: Write a Python program to check whether a given string is a palindrome.
+INPUT: racecar

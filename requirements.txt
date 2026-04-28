@@ -1,0 +1,7 @@
+python-docx>=1.1.0
+Pillow>=10.0.0
+pygments>=2.15.0
+
+# To build a standalone .exe (Windows):
+#   pip install pyinstaller
+#   python build.py

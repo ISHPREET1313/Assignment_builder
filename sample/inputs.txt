@@ -1,0 +1,23 @@
+# ──────────────────────────────────────────────────────
+#  inputs.txt  (optional — overrides INPUT: in questions.txt)
+#  Place this file in the SAME FOLDER as questions.txt.
+#
+#  Format: one block per experiment, separated by blank line.
+#    EXP:   must match the EXP number in questions.txt
+#    INPUT: the stdin data to pass to the program
+# ──────────────────────────────────────────────────────
+
+EXP: 1
+INPUT: 10 20
+
+EXP: 2
+INPUT: 13
+
+EXP: 3
+INPUT: 10
+
+EXP: 4
+INPUT: 5
+
+EXP: 5
+INPUT: madam
