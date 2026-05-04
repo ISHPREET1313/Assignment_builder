@@ -21,6 +21,15 @@ if sys.platform == "win32":
 sys.path.insert(0, os.path.dirname(__file__))
 
 from app.gui import launch
+from app.splash import SplashScreen
+
+
+def main():
+    def on_done():
+        launch()
+
+    SplashScreen(on_done=on_done).run()
+
 
 if __name__ == "__main__":
-    launch()
+    main()
