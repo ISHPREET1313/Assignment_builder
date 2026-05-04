@@ -26,7 +26,7 @@ T_DONE         = 4.95
 TICK_MS   = 16          # ~60 fps
 SPLASH_W  = 820         # starting window width
 SPLASH_H  = 320         # starting window height
-FULL_W    = 1020        # final window size (matches App geometry)
+FULL_W    = 1060        # must match App geometry width
 FULL_H    = 700
 
 
@@ -266,9 +266,23 @@ class SplashScreen:
 
     def _finish(self):
         self._done = True
-        self.root.destroy()
-        if self._on_done:
-            self._on_done()
+        # Smooth fade-out before handing off to the main window
+        self._fade_out(1.0)
+
+    def _fade_out(self, alpha: float):
+        """Lower alpha to 0 smoothly, then destroy and call on_done."""
+        if alpha > 0.0:
+            self.root.attributes("-alpha", max(alpha, 0.0))
+            next_alpha = alpha - 0.07          # ~14 steps × 16 ms ≈ 220 ms
+            self.root.after(16, lambda: self._fade_out(next_alpha))
+        else:
+            self.root.attributes("-alpha", 0.0)
+            # Capture the centred position so App can open in the same spot
+            final_x = (self._sw - FULL_W) // 2
+            final_y = (self._sh - FULL_H) // 2
+            self.root.destroy()
+            if self._on_done:
+                self._on_done(final_x, final_y)
 
     def run(self):
         self._cur_w = SPLASH_W

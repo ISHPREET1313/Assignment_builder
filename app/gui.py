@@ -834,15 +834,23 @@ class App(tk.Tk):
         if p: var.set(p)
 
     def _open_output(self):
-        folder = self._out_var.get()
-        if folder and Path(folder).exists():
-            import subprocess, sys as _sys
-            if _sys.platform == "win32":
-                subprocess.Popen(["explorer", folder])
-            elif _sys.platform == "darwin":
-                subprocess.Popen(["open", folder])
-            else:
-                subprocess.Popen(["xdg-open", folder])
+        folder = self._out_var.get().strip()
+        if not folder:
+            return
+        p = Path(folder).resolve()
+        if not p.exists():
+            messagebox.showwarning("Not found",
+                f"Output folder does not exist:\n{p}", parent=self)
+            return
+        import os, sys as _sys
+        if _sys.platform == "win32":
+            os.startfile(str(p))          # most reliable on Windows
+        elif _sys.platform == "darwin":
+            import subprocess
+            subprocess.Popen(["open", str(p)])
+        else:
+            import subprocess
+            subprocess.Popen(["xdg-open", str(p)])
 
     # ── Session ──────────────────────────────────────────────────────────────
 
@@ -993,9 +1001,10 @@ class AutoDetectDialog(tk.Toplevel):
         entries = []
         for r in self._rows:
             entries.append({
-                "exp_no"  : r["no"],
-                "question": r["q"].get().strip() or f"Experiment {r['no']}",
-                "input"   : r["inp"].get().strip(),
+                "exp_no"   : r["no"],
+                "exp_label": "",          # user can set via Edit if needed
+                "question" : r["q"].get().strip() or f"Experiment {r['no']}",
+                "input"    : r["inp"].get().strip(),
             })
         self._on_confirm(entries)
         self.destroy()
@@ -1044,46 +1053,58 @@ class ExpDialog(tk.Toplevel):
 
         sep(pad).grid(row=1, column=0, columnspan=2, sticky="ew", pady=10)
 
+        # ── Experiment label in document ──────────────────────────────────────
+        lbl(pad, "Exp. label (in doc)", font=F_SMALL, fg=C["muted"]).grid(
+            row=2, column=0, sticky="w", pady=(0, 4))
+        label_frm = frm(pad, bg=C["bg"])
+        label_frm.grid(row=2, column=1, sticky="ew", padx=(12, 0), pady=(0, 4))
+        self._label = tk.StringVar(value=data.get("exp_label", "") if data else "")
+        entry(label_frm, self._label, width=10).pack(side="left")
+        lbl(label_frm, "  leave blank to use the number above",
+            font=F_SMALL, fg=C["muted"], bg=C["bg"]).pack(side="left", padx=(8, 0))
+
+        sep(pad).grid(row=3, column=0, columnspan=2, sticky="ew", pady=10)
+
         # ── Question ─────────────────────────────────────────────────────────
         lbl(pad, "Question / Aim", font=F_SMALL, fg=C["muted"]).grid(
-            row=2, column=0, sticky="nw", pady=6)
+            row=4, column=0, sticky="nw", pady=6)
         self._q = textbox(pad, font=F_BODY, height=4, width=56)
-        self._q.grid(row=2, column=1, sticky="ew", padx=(12, 0), pady=6)
+        self._q.grid(row=4, column=1, sticky="ew", padx=(12, 0), pady=6)
         if data:
             self._q.insert("1.0", data["question"])
 
         # ── Input ────────────────────────────────────────────────────────────
         lbl(pad, "Input (stdin)", font=F_SMALL, fg=C["muted"]).grid(
-            row=3, column=0, sticky="nw", pady=6)
+            row=5, column=0, sticky="nw", pady=6)
         lbl(pad,
             "One value per\nline — piped to\nstdin on run.\n\nLeave blank\nif none needed.",
-            font=F_SMALL, fg=C["muted"]).grid(row=4, column=0, sticky="nw")
+            font=F_SMALL, fg=C["muted"]).grid(row=6, column=0, sticky="nw")
 
         self._inp = textbox(pad, height=6, width=56)
-        self._inp.grid(row=3, column=1, rowspan=2, sticky="ew", padx=(12, 0), pady=6)
+        self._inp.grid(row=5, column=1, rowspan=2, sticky="ew", padx=(12, 0), pady=6)
         if data:
             self._inp.insert("1.0", data["input"])
 
         # ── Preview ──────────────────────────────────────────────────────────
         lbl(pad, "Stdin preview", font=F_SMALL, fg=C["muted"]).grid(
-            row=5, column=0, sticky="nw", pady=(10, 0))
+            row=7, column=0, sticky="nw", pady=(10, 0))
         self._preview = tk.Text(
             pad, font=F_MONO_B, bg=C["log_bg"], fg=C["success"],
             height=4, relief="flat", state="disabled",
             highlightbackground=C["border"], highlightthickness=1,
             width=56, padx=12, pady=8)
-        self._preview.grid(row=5, column=1, sticky="ew", padx=(12, 0), pady=(10, 0))
+        self._preview.grid(row=7, column=1, sticky="ew", padx=(12, 0), pady=(10, 0))
         self._inp.bind("<KeyRelease>", lambda e: self._update_preview())
         self._update_preview()
 
         lbl(pad, "Each line above becomes one stdin entry.",
             font=F_SMALL, fg=C["muted"]).grid(
-            row=6, column=0, columnspan=2, sticky="w", pady=(8, 0))
+            row=8, column=0, columnspan=2, sticky="w", pady=(8, 0))
 
         # ── Buttons ──────────────────────────────────────────────────────────
-        sep(pad).grid(row=7, column=0, columnspan=2, sticky="ew", pady=(14, 0))
+        sep(pad).grid(row=9, column=0, columnspan=2, sticky="ew", pady=(14, 0))
         brow = frm(pad, bg=C["bg"])
-        brow.grid(row=8, column=0, columnspan=2, pady=(12, 0), sticky="e")
+        brow.grid(row=10, column=0, columnspan=2, pady=(12, 0), sticky="e")
         btn(brow, "Cancel", self.destroy,
             bg=C["card"], fg=C["text_dim"], px=16, py=6,
             hover=C["card_hover"]).pack(side="left", padx=(0, 8))
@@ -1123,16 +1144,17 @@ class ExpDialog(tk.Toplevel):
         self._preview.configure(state="disabled")
 
     def _save(self):
-        no  = self._no.get().strip()
-        q   = self._q.get("1.0", "end").strip()
-        inp = self._inp.get("1.0", "end").rstrip("\n")
+        no    = self._no.get().strip()
+        label = self._label.get().strip()
+        q     = self._q.get("1.0", "end").strip()
+        inp   = self._inp.get("1.0", "end").rstrip("\n")
         if not no:
             messagebox.showerror("Error", "Experiment number required.", parent=self)
             return
         if not q:
             messagebox.showerror("Error", "Question / Aim required.", parent=self)
             return
-        self._on_save({"exp_no": no, "question": q, "input": inp})
+        self._on_save({"exp_no": no, "exp_label": label, "question": q, "input": inp})
         self.destroy()
 
 
@@ -1141,5 +1163,8 @@ def _sort_key(exp_no):
     except: return (1, exp_no)
 
 
-def launch():
-    App().mainloop()
+def launch(x=None, y=None):
+    app = App()
+    if x is not None and y is not None:
+        app.geometry(f"1060x700+{x}+{y}")
+    app.mainloop()

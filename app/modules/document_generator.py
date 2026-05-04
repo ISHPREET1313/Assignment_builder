@@ -73,6 +73,9 @@ def _clear_body(doc):
 def _add_borders(cell, color="444444", sz="4"):
     tc   = cell._tc
     tcPr = tc.get_or_add_tcPr()
+    # Remove any existing tcBorders to avoid duplicate XML (causes Word corruption)
+    for old in tcPr.findall(qn("w:tcBorders")):
+        tcPr.remove(old)
     tcB  = OxmlElement("w:tcBorders")
     for side in ("top","left","bottom","right"):
         el = OxmlElement(f"w:{side}")
@@ -86,6 +89,9 @@ def _add_borders(cell, color="444444", sz="4"):
 def _shade_cell(cell, hex_color):
     tc   = cell._tc
     tcPr = tc.get_or_add_tcPr()
+    # Remove any existing shd to avoid duplicate XML (causes Word corruption)
+    for old in tcPr.findall(qn("w:shd")):
+        tcPr.remove(old)
     shd  = OxmlElement("w:shd")
     shd.set(qn("w:val"),   "clear")
     shd.set(qn("w:color"), "auto")
@@ -207,7 +213,9 @@ class DocumentGenerator:
         doc.add_paragraph()
 
         for entry in results:
-            h = doc.add_heading(f"Experiment {entry['exp_no']}", level=1)
+            # exp_label is the display label in the doc; falls back to exp_no if not set
+            label = entry.get("exp_label") or entry["exp_no"]
+            h = doc.add_heading(f"Experiment {label}", level=1)
             if h.runs:
                 h.runs[0].font.color.rgb = RGBColor(0x1F, 0x49, 0x7D)
 

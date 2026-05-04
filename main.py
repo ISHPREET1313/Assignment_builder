@@ -25,8 +25,8 @@ from app.splash import SplashScreen
 
 
 def main():
-    def on_done():
-        launch()
+    def on_done(x=0, y=0):
+        launch(x=x, y=y)
 
     SplashScreen(on_done=on_done).run()
 

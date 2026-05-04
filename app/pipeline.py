@@ -102,6 +102,7 @@ class Pipeline:
 
             results.append({
                 "exp_no"     : exp_no,
+                "exp_label"  : entry.get("exp_label", "").strip() or exp_no,
                 "question"   : question,
                 "language"   : language,
                 "source_code": source_code,
